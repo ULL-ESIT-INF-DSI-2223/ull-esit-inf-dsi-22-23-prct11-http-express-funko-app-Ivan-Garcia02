@@ -1,6 +1,6 @@
 import 'mocha'
 import { expect } from "chai";
-import { holaMundo } from "../src/index";
+import { holaMundo } from "../src/index.js";
 
 describe('Pruebas para holaMundo', () => {
   it('Test', () => {
