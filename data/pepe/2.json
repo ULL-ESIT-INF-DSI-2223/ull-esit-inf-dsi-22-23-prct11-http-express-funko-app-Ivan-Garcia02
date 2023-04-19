@@ -1,0 +1,12 @@
+{
+  "ID": 2,
+  "nombre": "Pepe",
+  "descripcion": "pepe funko",
+  "tipo": "Pop! Rides",
+  "genero": "Animacion",
+  "franquicia": "Pepes",
+  "numeroFranquicia": 1,
+  "exclusivo": true,
+  "caractericticasEspeciales": "",
+  "valorMercado": 10
+}

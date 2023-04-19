@@ -1,0 +1,12 @@
+{
+  "ID": 3,
+  "nombre": "AquaMan",
+  "descripcion": "Funko Pop de Aquaman",
+  "tipo": "Pop! Rides",
+  "genero": "Peliculas",
+  "franquicia": "DC",
+  "numeroFranquicia": 1,
+  "exclusivo": true,
+  "caractericticasEspeciales": "Acuatico",
+  "valorMercado": 4.87
+}

@@ -1,0 +1,12 @@
+{
+  "ID": 5,
+  "nombre": "Ivan",
+  "descripcion": "Funko Pop de Ivan",
+  "tipo": "Pop!",
+  "genero": "Animacion",
+  "franquicia": "ULL",
+  "numeroFranquicia": 1,
+  "exclusivo": true,
+  "caractericticasEspeciales": "Estudiar",
+  "valorMercado": 28.57
+}

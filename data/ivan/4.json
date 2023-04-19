@@ -1,0 +1,12 @@
+{
+  "ID": 4,
+  "nombre": "Joker",
+  "descripcion": "Funko Pop de Joker",
+  "tipo": "Pop! Rides",
+  "genero": "Videojuegos",
+  "franquicia": "DC",
+  "numeroFranquicia": 2,
+  "exclusivo": false,
+  "caractericticasEspeciales": "",
+  "valorMercado": 20
+}

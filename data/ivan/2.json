@@ -1,0 +1,12 @@
+{
+  "ID": 2,
+  "nombre": "Viuda Negra",
+  "descripcion": "Funko Pop de Viuda Negra",
+  "tipo": "Pop!",
+  "genero": "Peliculas",
+  "franquicia": "Marvel",
+  "numeroFranquicia": 2,
+  "exclusivo": false,
+  "caractericticasEspeciales": "Brilla",
+  "valorMercado": 5.2
+}
