@@ -1,4 +1,4 @@
-import { readFile, readdir, access, writeFile, mkdir, rm, constants } from 'fs';
+import { readFile, readdir, access, writeFile, mkdir, constants } from 'fs';
 import { TipoFunko, GeneroFunko, Funko} from "./funko.js";
 
 /**
@@ -42,12 +42,12 @@ export const getFunkos = (user: string, cb: (err: string | undefined, res: Funko
 };
 
 /**
- * Función para saber si existe un ID y para saber su índice
+ * Callback para saber si existe un ID y para saber su índice
  * @param funkoPops Coleccion de funkos a buscar el ID
  * @param ID Identificador único del Funko
- * @returns el indice del ID a buscar o -1
+ * @param cb Callback que contendra la salida correspondiente a un error y el indice
  */
-export function existeID(funkoPops: Funko[], ID: number | undefined) : number {
+export const existeID = (funkoPops: Funko[], ID: number | undefined, cb: (err: string | undefined, res: number) => void) => {
   let indexFound: number = -1;
 
   if (ID !== undefined) {
@@ -58,11 +58,11 @@ export function existeID(funkoPops: Funko[], ID: number | undefined) : number {
     })
   }
 
-  return indexFound;
+  cb(undefined, indexFound);
 }
 
 /**
- * Función encargada de cargar un Funko a un fichero JSON
+ * Callback encargada de cargar un Funko a un fichero JSON
  * @param ID Identificador único del Funko
  * @param nombre Nombre del Funko
  * @param descripcion Descripcion del Funko
@@ -73,19 +73,30 @@ export function existeID(funkoPops: Funko[], ID: number | undefined) : number {
  * @param exclusivo Verdadero en el caso de que el Funko sea exclusivo o falso en caso contrario
  * @param caracteristicasEspeciales Característica especiales del Funko como, por ejemplo, si brilla en la oscuridad o si su cabeza balancea
  * @param valorMercado Precio del Funko 
+ * @param cb Callback que retornara si hubo error
  */
-export function writeFunkoFile(usuario: string, ID: number, nombre: string, descripcion: string, tipo: TipoFunko, genero: GeneroFunko, franquicia: string, numeroFranquicia: number, exclusivo: boolean, caracteristicasEspeciales: string, valorMercado: number) {
+export const writeFunkoFile = (usuario: string, ID: number, nombre: string, descripcion: string, tipo: TipoFunko, genero: GeneroFunko, franquicia: string, numeroFranquicia: number, exclusivo: boolean, caracteristicasEspeciales: string, valorMercado: number, cb: (err: string | undefined) => void) => {
   let funkoToSave = {ID: ID, nombre: nombre, descripcion: descripcion, tipo: tipo, genero: genero, franquicia: franquicia, numeroFranquicia: numeroFranquicia, exclusivo: exclusivo, caractericticasEspeciales: caracteristicasEspeciales, valorMercado: valorMercado};
 
   access(('./data/' + usuario), constants.F_OK, (err) => {
     if (err) {
       mkdir('./data/' + usuario, (err) => {
         if (err) {
-          return console.error(err);
+          cb(`Error al crear el usuario: ${err}`);
         }
-        console.log('Directory created successfully!');
+        else {
+          console.log('Directory created successfully!');
+        }
       });
     }
-    writeFile('./data/' + usuario + '/' + ID + '.json', JSON.stringify(funkoToSave, null, 2), () => {});
+
+    writeFile('./data/' + usuario + '/' + ID + '.json', JSON.stringify(funkoToSave, null, 2), (error) => {
+      if (error) {
+        cb(`Error al guardar el funko: ${error}`);
+      }
+      else {
+        cb(undefined);
+      }
+    });
   });
 }

@@ -8,7 +8,7 @@ describe('Pruebas para servidor', () => {
 
     request.get({url: url, json: true, }, (error: Error, response) => {
       expect(response.body).to.be.eql({
-        "output": "app.ts\nfunko-app\nindex.ts\nmodificacion\n"
+        "output": "funko-app\nmodificacion\n"
       });
     });
   });

@@ -41,15 +41,18 @@ app.get('/funkos', (req, res) => {
           console.log('Un cliente quiere mostrar');
           let respuesta: ResponseType = {type: 'show', success: false, funkoPops: []};
           
-          let index: number = existeID(funkoPops, Number(req.query.ID));
-          if (index !== -1) { // Existe el ID
-            respuesta.success = true;
-            respuesta.funkoPops?.push({ID: funkoPops[index].ID, nombre: funkoPops[index].nombre, descripcion: funkoPops[index].descripcion, tipo: funkoPops[index].tipo, genero: funkoPops[index].genero, franquicia: funkoPops[index].franquicia, numeroFranquicia: funkoPops[index].numeroFranquicia, exclusivo: funkoPops[index].exclusivo, caracteristicasEspeciales: funkoPops[index].caracteristicasEspeciales, valorMercado: funkoPops[index].valorMercado});
-          }
+          existeID(funkoPops, Number(req.query.ID), (err, index) => {
+            if (!err) {
+              if (index !== -1) { // Existe el ID
+                respuesta.success = true;
+                respuesta.funkoPops?.push({ID: funkoPops[index].ID, nombre: funkoPops[index].nombre, descripcion: funkoPops[index].descripcion, tipo: funkoPops[index].tipo, genero: funkoPops[index].genero, franquicia: funkoPops[index].franquicia, numeroFranquicia: funkoPops[index].numeroFranquicia, exclusivo: funkoPops[index].exclusivo, caracteristicasEspeciales: funkoPops[index].caracteristicasEspeciales, valorMercado: funkoPops[index].valorMercado});
+              }
 
-          res.send({
-            respuesta: respuesta
-          });
+              res.send({
+                respuesta: respuesta
+              });
+            }
+          })
         }
       }
     });
@@ -75,13 +78,18 @@ app.post('/funkos', (req, res) => {
         }
 
         let respuesta: ResponseType = {type: 'add', success: false};
-        if (existeID(funkoPops, Number(req.query.ID)) === -1) { // NO existe el ID
-          respuesta.success = true;
-          writeFunkoFile(String(req.query.user), Number(req.query.ID), String(req.query.nombre), String(req.query.descripcion), convertTipoFunko(String(req.query.tipo)), convertGeneroFunko(String(req.query.genero)), String(req.query.franquicia), Number(req.query.numeroFranquicia), Boolean(req.query.exclusivo), String(req.query.caracteristicasEspeciales), Number(req.query.valorMercado));
-        }
-        
-        res.send({
-          respuesta: respuesta
+
+        existeID(funkoPops, Number(req.query.ID), (err, index) => {
+          if (!err) {
+            if (index === -1) { // NO existe el ID
+              respuesta.success = true;
+              writeFunkoFile(String(req.query.user), Number(req.query.ID), String(req.query.nombre), String(req.query.descripcion), convertTipoFunko(String(req.query.tipo)), convertGeneroFunko(String(req.query.genero)), String(req.query.franquicia), Number(req.query.numeroFranquicia), Boolean(req.query.exclusivo), String(req.query.caracteristicasEspeciales), Number(req.query.valorMercado), (error) => {});
+            }
+            
+            res.send({
+              respuesta: respuesta
+            });
+          }
         });
       }
     });
@@ -108,14 +116,17 @@ app.delete('/funkos', (req, res) => {
         }
 
         let respuesta: ResponseType = {type: 'remove', success: false};
-        let index: number = existeID(funkoPops, Number(req.query.ID));
-        if (index !== -1) { // Existe el ID
-          respuesta.success = true;
-          rm('./data/' + req.query.user + '/' + req.query.ID + '.json', () => {});
-        }
+        existeID(funkoPops, Number(req.query.ID), (err, index) => {
+          if(!err) {
+            if (index !== -1) { // Existe el ID
+              respuesta.success = true;
+              rm('./data/' + req.query.user + '/' + req.query.ID + '.json', () => {});
+            }
 
-        res.send({
-          respuesta: respuesta
+            res.send({
+              respuesta: respuesta
+            });
+          }
         });
       }
     });
@@ -131,7 +142,6 @@ app.patch('/funkos', (req, res) => {
   } else {
     console.log('Un cliente quiere modificar');
     getFunkos(req.query.user as string, (err, data) => {
-      console.log('sda');
       if (err) {
         res.send({
           error: err,
@@ -142,21 +152,24 @@ app.patch('/funkos', (req, res) => {
         }
 
         let respuesta: ResponseType = {type: 'update', success: false};
-        let index: number = existeID(funkoPops, Number(req.query.ID));
-        if (index !== -1) { // Existe el ID
-          respuesta.success = true;
-          console.log('sda');
-          writeFunkoFile(String(req.query.user), Number(req.query.ID), String(req.query.nombre), String(req.query.descripcion), convertTipoFunko(String(req.query.tipo)), convertGeneroFunko(String(req.query.genero)), String(req.query.franquicia), Number(req.query.numeroFranquicia), Boolean(req.query.exclusivo), String(req.query.caracteristicasEspeciales), Number(req.query.valorMercado));
-        }
-        
-        res.send({
-          respuesta: respuesta
+        existeID(funkoPops, Number(req.query.ID), (err, index) => {
+          if (!err) {
+            if (index !== -1) { // Existe el ID
+              respuesta.success = true;
+              writeFunkoFile(String(req.query.user), Number(req.query.ID), String(req.query.nombre), String(req.query.descripcion), convertTipoFunko(String(req.query.tipo)), convertGeneroFunko(String(req.query.genero)), String(req.query.franquicia), Number(req.query.numeroFranquicia), Boolean(req.query.exclusivo), String(req.query.caracteristicasEspeciales), Number(req.query.valorMercado), (error) => {});
+            }
+            
+            res.send({
+              respuesta: respuesta
+            });
+          }
         });
       }
     });
   }
 });
 
+
 app.listen(3000, () => {
-  console.log('Server is up on port 3000');
+  console.log('Servidor escuchando en el puerto 3000');
 });

@@ -1,6 +1,9 @@
 {
   "entryPoints": [
-    "./src/index.ts"
+    "./src/funko-app/funko.ts",
+    "./src/funko-app/funkoFiles.ts",
+    "./src/funko-app/servidorExpress.ts",
+    "./src/funko-app/types.ts"
   ],
   "out": "./docs" 
 }
