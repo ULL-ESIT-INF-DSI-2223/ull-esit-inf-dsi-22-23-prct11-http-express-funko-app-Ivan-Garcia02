@@ -60,10 +60,51 @@ Después, cuando reciba datos los irá almacenando en `wholeData`, para cuando e
 
 
 ## Ejercicio Modificación
+En este ejercicio nos pedían escribir un servidor express de HTTP. De tal forma que el cliente hiciera una petición de un comando a ejecutar al servidor, el servidor la ejecuta y le envía la salida del comando al cliente.
 
+Lo primero que hacemos es crear el servidor con `const app = express()` y ponernos a escuchar en el puerto correspondiente. 
+```typescript
+app.listen(3000, () => {
+  console.log('Servidor escuchando en el puerto 3000');
+});
+```
 
+A continuación, cuando se realiza una peticion `get` con la ruta correcta `/execmd`, comprobamos que existe el argumento `cmd` en la petición y si no es así enviamos un codigo de status *400*. En el caso de incluir el comando, creamos un proceso con `exec` para ejecutarlo. Después obtenemos la información de salida del comando y la enviamos al cliente, en caso de que el comando a ejecutar o los argumentos sean incorrectos enviamos el mensaje de error y un codigo de status *500*. Y en caso de que todo haya salido bien enviamos la salida del comando al cliente.
+```typescript
+app.get('/execmd', (req, res) => {
+  if (!req.query.cmd) {
+    res.status(400).send();
+  }
+  else {
+    let comando: string = req.query.cmd as string;
+    if (req.query.args) {
+      comando += ' ' + req.query.args as string;
+    }
 
+    exec(comando, (error, stdout, stderr) => {
+      if (error) {
+        res.status(500);
+        res.send({
+          error: error,
+          errorText: stderr
+        })
+      }
+      else {
+        res.send({
+          output: stdout
+        })
+      }
+    }); 
+  }
+});
+```
 
+Por último, en caso de recibir un `get` con cualquier otra ruta que no sea `/execmd`, enviamos un codigo de status *404*.
+```typescript
+app.get('*', (_, res) => {
+  res.status(404).send();
+});
+```
 
 ## Conclusiones
 En esta práctica hemos realizado varios ejercicios con los que hemos practicado los conceptos explicados en clase, sobre Node.js, las APIs asíncronas de gestión del sistema de ficheros (módulo `fs`), de creación de procesos (módulo `child_process`) y de creación de sockets (módulo `net`) de Node.js. y los paquetes `yargs` y `chalk`.
