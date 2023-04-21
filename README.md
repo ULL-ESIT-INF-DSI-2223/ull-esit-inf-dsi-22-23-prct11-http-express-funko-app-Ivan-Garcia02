@@ -20,43 +20,46 @@
 ## Índice
 - [Objetivos](#objetivos-de-la-práctica)
 - [Ejercicios propuestos](#ejercicios-propuestos)
-  - [Funko-App HTTP]()
+  - [Funko-App HTTP](#funko-app---servidor-express)
 - [Ejercicio modificación](#ejercicio-modificación)
 - [Conclusiones](#conclusiones)
 - [Bibliografía](#bibliografía)
 
 
 ## Objetivos de la práctica
-En esta práctica vamos a profundizar en los conceptos explicados en clase, sobre Node.js, las APIs asíncronas de gestión del sistema de ficheros (módulo `fs`), de creación de procesos (módulo `child_process`) y de creación de sockets (módulo `net`) de Node.js. y los paquetes `yargs` y `chalk`.
-
+En esta práctica vamos a profundizar en los conceptos explicados en clase, sobre Node.js, las APIs asíncronas de gestión del sistema de ficheros (módulo `fs`), de creación de procesos (módulo `child_process`) y de creación de servidores express de HTML (módulo `Express`) de Node.js.
 
 ## Ejercicios propuestos
-### Ejercicio 3 - Cliente y servidor para aplicación de registro de Funko Pops
-Para este ejercicio nos pedían, que partiendo de la implementación de la práctica anterior de *FunkoApp*, escribiéramos un servidor y un cliente haciendo uso de los sockets proporcionados por el módulo net de Node.js. Por ello tenemos el fichero `funko.ts` que contiene la declaración de la clase `Funko` para declarar funkos.
+### Funko App - Servidor Express
+Para este ejercicio nos pedían, que partiendo de la implementación de la práctica anterior de *FunkoApp*, escribiéramos un servidor HTTP escrito con Express, tal que desde un cliente como, por ejemplo, ThunderClient o Postman, se podrán llevar a cabo peticiones HTTP al servidor. Por ello, para empezar tenemos el fichero `funko.ts` que contiene la declaración de la clase `Funko` para declarar funkos. 
+Tambien tenemos en el fichero `types.ts`, nuestros propios tipos para modelar una respuesta desde el servidor al cliente.
 
-#### servidor.ts
-El servidor será el encargado de procesar la petición, preparar y envíar una respuesta de vuelta al cliente, es por ello que lo primero que hacemos es crear el servidor con `net.createServer((connection)` y ponernos a escuchar en el puerto correspondiente. A continuación, cuando recibamos un evento `data`, lo parseamos, y creamos el array de funkos a partir de los ficheros correspondientes al usuario de la petición, para ello usamos las funciones asíncronas `access`, `readdir` y `readFile` y cuando estas hayan terminado de analizar todos los ficheros e incluirlos a la colección de Funkos, emitiremos un evento con el tipo de petición a realizar:
+#### funkoFiles.ts
+En este fichero tenemos la definición de varias callback que usa el servidor, entre ellas tenemos las funciones `writeFunkoFile` y `existeID`, que ya teniamos definidas en las practicas anteriores y las hemos convertido a callbacks. Otra callback que encontramos aquí es `getFunkos` que usamos para inicializar todos los ficheros de funkos de un usuario en un array de `Funkos`, este codigo lo hemos reutilizado de la practica anterior y lo hemos encapsulado en un callback.
 
-- **add:** Lo primero que haremos es parsear el mensaje, para sí no existe el ID a incluir en la colección, crearlo y guardarlo en ficheros haciendo uso de la función `writeFunkoFile` que hará uso de las funciones asíncronas `access`, `mkdir` y `writeFile`. A continuación, creamos la respuesta, la enviamos al cliente y cerramos la conexión con este. En caso de que el ID existiese mandamos un mensaje con el valor `sucess` a *false*.
+#### servidorExpress.ts
+Lo primero que hacemos es crear el servidor con `const app = express()` y ponernos a escuchar en el puerto correspondiente. 
+```typescript
+app.listen(3000, () => {
+  console.log('Servidor escuchando en el puerto 3000');
+});
+```
 
-- **update:** Lo primero que haremos es parsear el mensaje, para sí existe el ID a modificar en la colección, modificarlo y guardarlo en ficheros haciendo uso de la función `writeFunkoFile` que hará uso de las funciones asíncronas `access`, `mkdir` y `writeFile`. A continuación, creamos la respuesta, la enviamos al cliente y cerramos la conexión con este. En caso de que el ID no existiese mandamos un mensaje con el valor `sucess` a *false*.
+- **Get:** Cuando se realiza una peticion `get`, en la ruta `/funkos`, lo primero que hacemos es comprobar que se ha introducido un usuario, y si no es así eviamos un error al cliente. A continuación, llamamos a la callback `getFunkos` para inicializar el array de Funkos y trabajar sobre el, si no ha habido errores continuamos y en el caso de que como parametro se haya introducido un ID haremos un *show* Funko, buscando el funko en el array y devolviendolo al cliente. En caso de que no se haya introducido ID haremos un *list*, en el que crearemos la respuesta en la que incluimos el array con todos los funkos, y lo enviamos al cliente.
 
-- **remove:** Lo primero que haremos es parsear el mensaje, para sí existe el ID a eliminar de la colección, eliminarlo de los ficheros haciendo uso de las función asincrona `rm`. A continuación, creamos la respuesta, la enviamos al cliente y cerramos la conexión con este. En caso de que el ID no existiese mandamos un mensaje con el valor `sucess` a *false*.
+- **Post:** Cuando se realiza una peticion `post`, en la ruta `/funkos`, lo primero que hacemos es comprobar que se ha introducido un usuario y todos los parametros de un Funko, y si no es así eviamos un error al cliente. A continuación, llamamos a la callback `getFunkos` para inicializar el array de Funkos y trabajar sobre el, si no ha habido errores continuamos y realizamos la operacion de añadir Funko, llamando a `existeID` y a `writeFunkoFile`, finalmente crearemos la respuesta en la que indicamos si todo fue bien y el tipo de operación, y lo enviamos al cliente.
 
-- **show:** Lo primero que haremos es parsear el mensaje, para sí existe el ID a mostrar de la colección, crear la respuesta en la que incluimos un array con el funko a mostrar y enviarlo al cliente y cerramos la conexión con este. En caso de que el ID no existiese mandamos un mensaje con el valor `sucess` a *false*.
+- **Delete:** Cuando se realiza una peticion `delete`, en la ruta `/funkos`, lo primero que hacemos es comprobar que se ha introducido un usuario y todos los parametros de un Funko, y si no es así eviamos un error al cliente. A continuación, llamamos a la callback `getFunkos` para inicializar el array de Funkos y trabajar sobre el, si no ha habido errores continuamos y realizamos la operacion de eliminar Funko, llamando a `existeID` y utilizando `rm`, finalmente crearemos la respuesta en la que indicamos si todo fue bien y el tipo de operación, y lo enviamos al cliente.
 
-- **list:** Lo primero que haremos es parsear el mensaje, después creamos la respuesta en la que incluimos un array con los funkos a mostrar y enviarlos al cliente y cerramos la conexión con este.
-
-#### cliente.ts
-El cliente será el encargado de haciendo uso de `yargs`, se introduzcan todos los datos y el comando a ejecutar, para construir una petición y mandársela al servidor. Para ello con `yargs` obtenemos todos los datos necesarios, al igual que en la práctica anterior, para guardarlos en unas variables globales que usará el cliente.
-
-A continuación, creamos una conexión con el servidor con `net` y aprovechamos para, desde la conexión, realizar un envío de datos al servidor con `write`, en la que en formato JSON enviamos la petición que construimos en el yargs.
-
-Después, cuando reciba datos los irá almacenando en `wholeData`, para cuando el servidor emite un evento `end` y cierre la conexión, el cliente parsea los datos recibidos y en un `switch-case` según el comando a ejecutar y si hubo exito o no, imprimir un mensaje personalizado de exito o no (haciendo uso de `chalk`) y en el caso de mostrar funkos imprimir los funkos también.
-
-
+- **Patch:** Cuando se realiza una peticion `patch`, en la ruta `/funkos`, lo primero que hacemos es comprobar que se ha introducido un usuario y todos los parametros de un Funko, y si no es así eviamos un error al cliente. A continuación, llamamos a la callback `getFunkos` para inicializar el array de Funkos y trabajar sobre el, si no ha habido errores continuamos y realizamos la operacion de modificar Funko, llamando a `existeID` y a `writeFunkoFile`, finalmente crearemos la respuesta en la que indicamos si todo fue bien y el tipo de operación, y lo enviamos al cliente.
 
 
+Por último, en caso de recibir un `get` con cualquier otra ruta que no sea `/execmd`, enviamos un codigo de status *404*.
+```typescript
+app.get('*', (_, res) => {
+  res.status(404).send();
+});
+```
 
 
 ## Ejercicio Modificación
@@ -107,9 +110,10 @@ app.get('*', (_, res) => {
 ```
 
 ## Conclusiones
-En esta práctica hemos realizado varios ejercicios con los que hemos practicado los conceptos explicados en clase, sobre Node.js, las APIs asíncronas de gestión del sistema de ficheros (módulo `fs`), de creación de procesos (módulo `child_process`) y de creación de sockets (módulo `net`) de Node.js. y los paquetes `yargs` y `chalk`.
+En esta práctica hemos realizado varios ejercicios con los que hemos practicado los conceptos explicados en clase, sobre Node.js, las APIs asíncronas de gestión del sistema de ficheros (módulo `fs`), de creación de procesos (módulo `child_process`) y de creación de servidores express de HTML (módulo `Express`) de Node.js.
 
-En concreto, he practicado más profundamente las funciones de la API asíncrona de Node.js, `writefile`, `readfile`, `access`, `mkdir` y `rm`. Además de los eventos a emitir por sockets `data`, `end`...
+En concreto, he practicado más profundamente las funciones de la API asíncrona de Node.js, `writefile`, `readfile`, `access`, `mkdir` y `rm`. Además de los tipo de peticiones de `Express`, `get`, `post`, `patch` y `delete`.
+
 
 ## Bibliografía
 - [Guion de la práctica](https://ull-esit-inf-dsi-2223.github.io/prct11-http-express-funko-app/)
